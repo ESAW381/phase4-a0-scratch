@@ -21,4 +21,4 @@ jobs:
         run: |
           echo "received_at=$(date -u +%H:%M:%S.%3NZ) event=${EVENT_NAME} action=${ACTION}"
           if [ "$EVENT_NAME" = "deployment_status" ]; then echo "deployment_status state=${DSTATE} env=${DENV} sha=${DSHA} status_created=${DCREATED} url=${DURL}"; fi
-          if [ "$EVENT_NAME" = "repository_dispatch" ]; then echo "client_payload=${PAYLOAD}"; fi
+          if [ "$EVENT_NAME" = "repository_dispatch" ]; then echo "client_payload=$(printf '%s' "$PAYLOAD" | jq -c .)"; fi
