@@ -1,0 +1,24 @@
+name: A0 event log
+on:
+  repository_dispatch:
+  deployment_status:
+permissions: {}
+jobs:
+  log:
+    name: event-log
+    runs-on: ubuntu-latest
+    steps:
+      - name: Record the event
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          ACTION: ${{ github.event.action }}
+          PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+          DSTATE: ${{ github.event.deployment_status.state }}
+          DENV: ${{ github.event.deployment.environment }}
+          DSHA: ${{ github.event.deployment.sha }}
+          DCREATED: ${{ github.event.deployment_status.created_at }}
+          DURL: ${{ github.event.deployment_status.environment_url }}
+        run: |
+          echo "received_at=$(date -u +%H:%M:%S.%3NZ) event=${EVENT_NAME} action=${ACTION}"
+          if [ "$EVENT_NAME" = "deployment_status" ]; then echo "deployment_status state=${DSTATE} env=${DENV} sha=${DSHA} status_created=${DCREATED} url=${DURL}"; fi
+          if [ "$EVENT_NAME" = "repository_dispatch" ]; then echo "client_payload=${PAYLOAD}"; fi

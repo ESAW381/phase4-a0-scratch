@@ -1,0 +1,21 @@
+name: A0 check-run helper
+on:
+  workflow_dispatch:
+    inputs:
+      sha: { description: "commit SHA", required: true }
+      conclusion: { description: "success|neutral|failure", required: true }
+permissions:
+  checks: write
+jobs:
+  make:
+    name: check-run-helper
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create a check run named like the gate on the given SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ inputs.sha }}
+          CONCLUSION: ${{ inputs.conclusion }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/check-runs" -f name="PushNotice Production Gate" -f head_sha="$SHA" -f status=completed -f conclusion="$CONCLUSION" -f "output[title]=A0 synthetic" -f "output[summary]=created by helper" --jq '"check_run id=\(.id) name=\(.name) conclusion=\(.conclusion) app=\(.app.slug)"'
+          echo "at=$(date -u +%H:%M:%S.%3NZ)"

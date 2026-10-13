@@ -1,0 +1,25 @@
+name: A0 gate
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  gate:
+    name: PushNotice Production Gate
+    if: ${{ !contains(github.event.head_commit.message, '[gate-skip]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Evaluate synthetic gate
+        run: |
+          mode=$(jq -r .mode gate.json); sleep_s=$(jq -r .sleep gate.json)
+          echo "sha=${GITHUB_SHA} mode=${mode} sleep=${sleep_s} attempt=${GITHUB_RUN_ATTEMPT} at=$(date -u +%H:%M:%S.%3NZ)"
+          sleep "${sleep_s}"
+          case "$mode" in
+            success) echo "PASS at $(date -u +%H:%M:%S.%3NZ)" ;;
+            failure) echo "FAIL"; exit 1 ;;
+            fail-first-attempt) if [ "${GITHUB_RUN_ATTEMPT}" = "1" ]; then echo "FAIL (attempt 1)"; exit 1; fi; echo "PASS on attempt ${GITHUB_RUN_ATTEMPT} at $(date -u +%H:%M:%S.%3NZ)" ;;
+            *) echo "unknown mode"; exit 1 ;;
+          esac
