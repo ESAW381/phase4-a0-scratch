@@ -1,1 +1,1 @@
-{"mode": "fail-first-attempt", "sleep": 0, "note": "S2-fail-then-rerun"}
+{"mode": "success", "sleep": 600, "note": "S3-cancelled"}
