@@ -1,0 +1,19 @@
+name: A0 two-job rerun probe
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  always-green:
+    name: Always green
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "attempt ${GITHUB_RUN_ATTEMPT}"
+  red-first:
+    name: Red on first attempt
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "attempt ${GITHUB_RUN_ATTEMPT}"
+          if [ "${GITHUB_RUN_ATTEMPT}" = "1" ]; then exit 1; fi
