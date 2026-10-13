@@ -1,1 +1,1 @@
-{"mode": "success", "sleep": 0, "note": "S8C-after-rollback"}
+{"mode": "failure", "sleep": 0, "note": "S9D-force-promote"}
