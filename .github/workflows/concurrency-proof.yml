@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     concurrency:
-      group: purge-cloudflare-production-${{ github.event_name }}-${{ github.event.deployment.id || github.run_id }}
+      group: purge-cloudflare-production-${{ github.event_name }}-${{ github.event.deployment_status.id || github.run_id }}
       cancel-in-progress: true
     steps:
       - run: |
-          echo "group=purge-cloudflare-production-${{ github.event_name }}-${{ github.event.deployment.id || github.run_id }}"
+          echo "deployment=${{ github.event.deployment.id }} status=${{ github.event.deployment_status.id }} group=purge-cloudflare-production-${{ github.event_name }}-${{ github.event.deployment_status.id || github.run_id }}"
           sleep 90
