@@ -1,0 +1,31 @@
+name: PR target probe
+
+# Observation 9 scratch proof: can a pull_request_target GITHUB_TOKEN with exactly the Gate-file
+# guard's permissions read the open PR list and the commit's PR list? Prints counts and numbers only.
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Read the PR lists with GITHUB_TOKEN
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: node {0}
+        run: |
+          const base = "https://api.github.com/repos/" + process.env.GITHUB_REPOSITORY;
+          const get = async p => { const r = await fetch(base + p, { headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}`, Accept: "application/vnd.github+json" } }); return { status: r.status, json: r.ok ? await r.json() : null }; };
+          const a = await get(`/pulls?state=open&base=main&per_page=100&page=1`);
+          console.log(`open-pulls status=${a.status} count=${a.json ? a.json.length : "-"} entries=${JSON.stringify((a.json || []).map(p => [p.number, p.head.sha.slice(0, 7), p.draft, typeof p.title]))}`);
+          const b = await get(`/commits/${process.env.HEAD_SHA}/pulls?per_page=100`);
+          console.log(`commit-pulls status=${b.status} count=${b.json ? b.json.length : "-"} entries=${JSON.stringify((b.json || []).map(p => [p.number, p.state, p.head.sha.slice(0, 7), typeof p.title]))}`);
