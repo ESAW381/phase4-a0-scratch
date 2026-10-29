@@ -1,0 +1,17 @@
+name: Timeout probe
+
+# Stage C readiness proof: what check-run conclusion does GitHub give a job killed by its own
+# timeout-minutes? (The real Production Gate job has timeout-minutes: 25.) Manual only.
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  timeout-probe:
+    name: Timeout probe job
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Sleep past the job timeout
+        run: sleep 150
